@@ -3,16 +3,27 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from .managers import CustomUserManager
 from django.conf import settings
+from attendance.models import Department
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 class CustomUser(AbstractUser):
     username = models.CharField(_("Username"), max_length=100, unique=True)
     email = models.EmailField(_("Email"), unique=True)
+    role = models.CharField(max_length=20, choices=[('student', 'Student'), ('teacher','Teacher'), ('admin', 'Admin'), ('employee', 'Employee')], default='student')
+    department = models.ForeignKey(Department,blank=True, null= True, on_delete = models.SET_NULL)
+    roll_number = models.CharField(max_length=20, blank=True, null=True, unique=True)
+
     # comment = models.TextField(_("Comment"), blank=True, null=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']  # Add 'username' to REQUIRED_FIELDS
-
+    REQUIRED_FIELDS = ['username','role']  # Add 'username' to REQUIRED_FIELDS
+    
+    def clean(self):
+        super().clean()
+        if self.role == 'student' and not self.roll_number:
+            raise ValidationError({'roll_number': 'Roll number is required for students.'})
+        
     objects = CustomUserManager()
 
     def __str__(self):

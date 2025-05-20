@@ -2,11 +2,15 @@ from django.contrib.auth.base_user import BaseUserManager
 
 class CustomUserManager(BaseUserManager):
 
-    def create_user(self, email, username, password, **extra_fields):
+    def create_user(self, email, username, password=None, role='student', roll_number=None, **extra_fields):
         if not email:
-            raise ValueError("Please enter an email address")
+            raise ValueError('Users must have an email address')
+        
+        if role == 'student' and not roll_number:
+            raise ValueError('Students must have a roll number.')
+
         email = self.normalize_email(email)
-        user = self.model(email=email, username=username, **extra_fields)
+        user = self.model(email=email, username=username, role=role, roll_number=roll_number, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
