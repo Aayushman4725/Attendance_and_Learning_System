@@ -46,13 +46,14 @@ class Schedule(models.Model):
 
 class Attendance(models.Model):
     user_group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
-    date = models.DateField()
-    check_in = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    date = models.DateField(auto_now_add=True)
+    check_in = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=[('present', 'Present'), ('absent', 'Absent'), ('leave', 'Leave'), ('late', 'Late')])
     note = models.TextField(blank=True)
     
     def __str__(self):
-        user = getattr(self.user_group.user, "username", "Unknown")
+        user = getattr(self.user, "username", "Unknown")
         course = getattr(self.user_group.course, "name", "Unknown")
         group = getattr(self.user_group.group, "name", "Unknown")
         check_in = getattr(self, "check_in", "Unknown")
