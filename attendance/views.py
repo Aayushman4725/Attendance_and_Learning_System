@@ -3,8 +3,9 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes,authentication_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from authenticate.serializers import User
 from .models import Attendance
-from .serializers import AttendanceSerializer
+from .serializers import AttendanceSerializer,UserGroupSerializer
 # Create your views here.
 
 @api_view(['GET'])
@@ -34,6 +35,22 @@ def attendance_create(request):
                 {
                     "data": serializers.data,
                     "message": "Student attendance taken"
+                },
+                status=status.HTTP_201_CREATED
+            )
+        return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_user_group(request):
+    if request.method == 'POST':
+        serializers = UserGroupSerializer(data=request.data)
+        
+        if serializers.is_valid():
+            serializers.save()
+            return Response(
+                {"data" : serializers.data,
+                 "message": "User group created successfully"
                 },
                 status=status.HTTP_201_CREATED
             )
